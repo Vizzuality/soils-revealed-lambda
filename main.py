@@ -1,20 +1,12 @@
 import numpy as np
-import pandas as pd
 import xarray as xr
-import dask.array as da
-from dask.diagnostics import ProgressBar
-import zarr
-import s3fs
+from xhistogram.xarray import histogram
+from datetime import datetime
 from affine import Affine
 from rasterio import features
 from shapely.geometry import Polygon
-import os
-from dotenv import load_dotenv
-from pathlib import Path
+import _pickle as pickle
 import json
-
-load_dotenv()
-env_path = Path('.') / '.env'
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -48,26 +40,6 @@ def rasterize(shapes, coords, latitude='latitude', longitude='longitude',
     spatial_coords = {latitude: coords[latitude], longitude: coords[longitude]}
     return xr.DataArray(raster, coords=spatial_coords, dims=(latitude, longitude))
 
-def read_dataset(dataset_type, group, access_key_id, secret_accsess_key):
-    # AWS S3 path
-    s3_path = f's3://soils-revealed/{dataset_type}.zarr'
-    # Initilize the S3 file system
-    s3 = s3fs.S3FileSystem(key=access_key_id, secret=secret_accsess_key)
-    store = s3fs.S3Map(root=s3_path, s3=s3, check=False)
-    # Read Zarr file
-    ds = xr.open_zarr(store=store, group=group, consolidated=True)
-    
-    # Change coordinates names
-    ds = ds.rename({'x': 'lon', 'y': 'lat'})
-    
-    # Change depth coord from 0 to 1 dimensional array
-    depths = ds.coords.get('depth').values
-    if depths.ndim == 0: 
-        ds = ds.squeeze().drop("depth")
-        ds = ds.assign_coords({"depth": np.array([depths])})
-        
-    return ds 
-
 def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nBinds, bindsRange):
     
     if dataset_type == 'global-dataset' and group == 'historic':
@@ -75,9 +47,9 @@ def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nB
         end_date = years[1]
         mean_years = ds.coords.get('time').values
     else:
-        start_date = np.datetime64(pd.DatetimeIndex([f'{years[0]}-12-31'])[0])
-        end_date = np.datetime64(pd.DatetimeIndex([f'{years[1]}-12-31'])[0])
-        mean_years = list(pd.DatetimeIndex(ds.coords.get('time').values).year)
+        start_date = np.datetime64(datetime.strptime(f'{years[0]}-12-31', "%Y-%m-%d"))
+        end_date = np.datetime64(datetime.strptime(f'{years[1]}-12-31', "%Y-%m-%d"))
+        mean_years = [int(str(x).split('-')[0]) for x in ds.coords.get('time').values]
     
     xmin, ymax, xmax, ymin = geometry.bounds
     ds_index = ds.where(ds['mask'].isin(0.0)).sel(depth='0-30', lon=slice(xmin, xmax), lat=slice(ymin, ymax))
@@ -90,13 +62,13 @@ def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nB
         diff = diff[variable]/10.
     else:
         diff = diff[variable]
-        
-    h, bins = da.histogram(diff, bins=nBinds, range=bindsRange)
-    
-    with ProgressBar():
-        counts = h.compute()
-        mean_diff = diff.mean(skipna=True).values 
-        mean_values = ds_index[variable].mean(['lon', 'lat']).values
+
+    bins = np.linspace(bindsRange[0], bindsRange[1], nBinds+1)
+    h = histogram(diff, bins=[bins], dim=['lat', 'lon'])
+
+    counts = h.values
+    mean_diff = diff.mean(skipna=True).values 
+    mean_values = ds_index[variable].mean(['lon', 'lat']).values
         
     return counts, bins, mean_diff, mean_years, mean_values
 
@@ -113,9 +85,12 @@ def serializer(counts, bins, mean_diff, mean_years, mean_values):
 def analysis(request):
     request = request.get_json()
     
-    # Read xarray.Dataset from Zarr in Amazon S3 bucket
-    ds = read_dataset(request['dataset_type'], request['group'], access_key_id = os.getenv("S3_ACCESS_KEY_ID"), 
-                      secret_accsess_key = os.getenv("S3_SECRET_ACCESS_KEY"))
+    # Read xarray.Dataset from pkl
+    dataset_type = request['dataset_type']
+    group = request['group']
+
+    with open(f'{dataset_type}_{group}.pkl', 'rb') as input:
+        ds = pickle.load(input)
     
     # Create the data mask by rasterizing the vector data
     geometry = Polygon(request['geometry'].get('features')[0].get('geometry').get('coordinates')[0])
