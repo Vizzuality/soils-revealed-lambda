@@ -119,3 +119,4 @@ custom:
     dockerizePip: true
     zip: true
     slim: true
+    layer: true
