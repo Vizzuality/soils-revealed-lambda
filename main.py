@@ -12,6 +12,12 @@ from rasterio import features
 from shapely.geometry import Polygon
 import _pickle as pickle
 import json
+import logging
+import jsonpickle
+import boto3
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -87,8 +93,10 @@ def serializer(counts, bins, mean_diff, mean_years, mean_values):
         'mean_values':mean_values
     }
 
-def analysis(request):
-    request = request.get_json()
+def analysis(event, context):
+    logger.info('## EVENT\r' + jsonpickle.encode(event))
+    logger.info('## CONTEXT\r' + jsonpickle.encode(context))
+    request = event.get_json()
     
     # Read xarray.Dataset from pkl
     dataset_type = request['dataset_type']
