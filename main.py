@@ -13,8 +13,8 @@ from shapely.geometry import Polygon
 import _pickle as pickle
 import json
 import logging
-import jsonpickle
-import boto3
+#import jsonpickle
+#import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -94,8 +94,9 @@ def serializer(counts, bins, mean_diff, mean_years, mean_values):
     }
 
 def analysis(event, context):
-    logger.info('## EVENT\r' + jsonpickle.encode(event))
-    logger.info('## CONTEXT\r' + jsonpickle.encode(context))
+    
+    logger.info('## EVENT\r' + json.dumps(event))
+    logger.info('## CONTEXT\r' + json.dumps(context))
     request = event.get_json()
     
     # Read xarray.Dataset from pkl
@@ -117,5 +118,11 @@ def analysis(event, context):
                                                                       request['variable'], request['dataset_type'], 
                                                                       request['group'], request['nBinds'], 
                                                                       request['bindsRange'])
-    
-    return json.dumps(serializer(counts, bins, mean_diff, mean_years, mean_values), cls=NpEncoder)
+    # create response
+    response = {
+        "statusCode": 200,
+        "body": json.dumps(serializer(counts, bins, mean_diff, mean_years, mean_values), cls=NpEncoder)
+    }
+
+    # return response
+    return response
