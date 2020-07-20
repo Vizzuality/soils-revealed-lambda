@@ -1,3 +1,8 @@
+try:
+  import unzip_requirements
+except ImportError:
+  pass
+
 import numpy as np
 import xarray as xr
 from xhistogram.xarray import histogram
