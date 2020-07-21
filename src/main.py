@@ -95,9 +95,9 @@ def serializer(counts, bins, mean_diff, mean_years, mean_values):
 
 def analysis(event, context):
     
-    logger.info('## EVENT\r' + json.dumps(event))
-    logger.info('## CONTEXT\r' + json.dumps(context))
-    request = event.get_json()
+    logger.info(f'## EVENT\r {event}')
+    logger.info(f'## CONTEXT\r {context}')
+    request = event#.get_json()
     
     # Read xarray.Dataset from pkl
     dataset_type = request['dataset_type']
