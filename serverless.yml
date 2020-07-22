@@ -16,6 +16,7 @@ custom:
     layer: true
   
   localstack:
+    debug: true
     stages:
       - local
     host: http://192.168.2.43
@@ -28,7 +29,7 @@ package:
     - test/**
     - docker-compose.yml- test/**
   include:
-    - src/*
+    - src/**
 
 functions:
   analysis:

@@ -13,6 +13,7 @@ from shapely.geometry import Polygon
 import _pickle as pickle
 import json
 import logging
+import os
 #import jsonpickle
 #import boto3
 
@@ -104,8 +105,9 @@ def analysis(event, context):
     group = request['group']
 
     logger.info(f'## DATASET\r {dataset_type}')
+    parent = os.getcwd()
 
-    with open(f'{dataset_type}_{group}.pkl', 'rb') as input:
+    with open(f'{parent}/src/{dataset_type}_{group}.pkl', 'rb') as input:
         ds = pickle.load(input)
     
     # Create the data mask by rasterizing the vector data

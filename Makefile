@@ -7,11 +7,12 @@ deploy:
 	serverless deploy
 
 test:
-	serverless invoke local --function analysis --path test/data.json
+	# serverless invoke local --function analysis --path test/data.json
+	serverless invoke -f analysis --stage local --path test/data.json 
 
 deploy-local:
 	serverless deploy --stage local --region us-east-1
-	serverless invoke -f analysis --stage local --path test/data.json
+	serverless invoke -f analysis --stage local --path test/data.json 
 
 up-local:
 	docker-compose up -d
