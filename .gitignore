@@ -153,6 +153,7 @@ var/
 .installed.cfg
 *.egg
 
+unzip_requirements.py
 # Serverless directories
 .serverless
 #*.pkl
