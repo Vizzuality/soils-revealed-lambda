@@ -4,7 +4,10 @@
   "description": "Serverless py example",
   "author": "",
   "license": "MIT",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "serverless": "^1.75.1",
+    "serverless-localstack": "^0.4.24",
     "serverless-python-requirements": "^5.1.0"
   }
 }

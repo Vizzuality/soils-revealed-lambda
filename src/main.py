@@ -103,6 +103,8 @@ def analysis(event, context):
     dataset_type = request['dataset_type']
     group = request['group']
 
+    logger.info(f'## DATASET\r {dataset_type}')
+
     with open(f'{dataset_type}_{group}.pkl', 'rb') as input:
         ds = pickle.load(input)
     

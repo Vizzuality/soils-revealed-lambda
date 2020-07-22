@@ -155,5 +155,4 @@ var/
 
 # Serverless directories
 .serverless
-
-*.pkl
+#*.pkl

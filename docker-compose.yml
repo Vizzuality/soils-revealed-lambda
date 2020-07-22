@@ -1,0 +1,10 @@
+version: '3'
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4567-4592:4567-4592"
+      - "8080:8080"
+    environment:
+      # Only start a subset of services required for testing.
+      - SERVICES=s3,sns,sqs,apigateway,lambda,dynamodb,dynamodbstreams,cloudformation

@@ -4,15 +4,9 @@ provider:
   name: aws
   runtime: python3.8
 
-functions:
-  analysis:
-    handler: src/main.analysis
-    events:
-      - http:
-          path: hello
-          method: post
 plugins:
   - serverless-python-requirements
+  - serverless-localstack
 
 custom:
   pythonRequirements:
@@ -20,3 +14,26 @@ custom:
     zip: true
     slim: true
     layer: true
+  
+  localstack:
+    stages:
+      - local
+    host: http://192.168.2.43
+    endpointFile: resources/localstack/localstack_endpoints.json
+    lambda:
+      mountCode: True
+package:
+  exclude:
+    - node_modules/**
+    - test/**
+    - docker-compose.yml- test/**
+  include:
+    - src/*
+
+functions:
+  analysis:
+    handler: src/main.analysis
+    events:
+      - http:
+          path: hello
+          method: post
