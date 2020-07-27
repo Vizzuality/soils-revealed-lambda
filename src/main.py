@@ -113,6 +113,10 @@ def analysis(event, context):
     # Create the data mask by rasterizing the vector data
     geometry = Polygon(request['geometry'].get('features')[0].get('geometry').get('coordinates')[0])
     
+    # Get bbox and filter
+    xmin, ymax, xmax, ymin = geometry.bounds
+    ds = ds[group].sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax)
+
     shapes = zip([geometry], range(1))
     da_mask = rasterize(shapes, ds.coords, longitude='lon', latitude='lat').rename('mask')
     ds['mask'] = da_mask   
