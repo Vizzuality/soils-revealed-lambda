@@ -13,21 +13,22 @@ custom:
     dockerizePip: true
     zip: true
     slim: true
-    layer: true
+    #layer: true
   
   localstack:
     debug: true
     stages:
       - local
-    host: http://192.168.2.43
+    host: http://localhost
     endpointFile: resources/localstack/localstack_endpoints.json
     lambda:
       mountCode: True
+
 package:
   exclude:
     - node_modules/**
     - test/**
-    - docker-compose.yml- test/**
+    #- docker-compose.yml- test/**
   include:
     - src/**
 
@@ -38,3 +39,6 @@ functions:
       - http:
           path: hello
           method: post
+# layers:
+#   ffmpeg:
+#     path: layer
