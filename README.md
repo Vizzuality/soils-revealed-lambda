@@ -1,29 +1,86 @@
-# MGIS Cloud optimize geotiff service.
+# Soils analysis service.
+Get started:
+you will need docker and docker compose,
+Run:
+```
+./service.sh develop
+```
+to start working with this service. T test it please refer to service work
 
-Only Crop selected:
-`GET`
+
+## project structure
+```
++analysis
+    +-----data
+    +-----src
+        +---main.py
+        +---utils.py
+        +---validator.py
+        +---errors.py
+```
+## Service work
+`POST`
 
 ```
-http://${MARS_API_URL}/api/v1/cog/raster/{z}/{x}/{y}.png?mask=raster_${crop}_production_webmerc_cog.tif
+http://${API_URL}/http://0.0.0.0:5020/api/v1/analysis
 ```
-
-Only risk selected:
-`GET`
-
-```
-http://${MARS_API_URL}/api/v1/cog/raster/{z}/{x}/{y}.png?data=raster_aqueduct3_bws_webmerc_cog.tif
-```
-
-Risk and Crop selected:
-`GET`
-
-```
-http://${MARS_API_URL}/api/v1/cog/raster/{z}/{x}/{y}.png?data=raster_aqueduct3_bws_webmerc_cog.tif&mask=raster_${crop}_production_webmerc_cog.tif
-```
-
-Interactivity:
-`GET`
-
-```
-http://${MARS_API_URL}/api/v1/cog/raster/point/?data=raster_aqueduct3_bws_webmerc_cog.tif&lat=-14379964&long=-11880235&mask=raster_${crop}_production_webmerc_cog.tif
+```json
+body:
+{
+    "dataset_type": "experimental-dataset",
+    "group": "stocks",
+    "years": ["1982", "2017"],
+    "depth": "0-30",
+    "variable": "stocks",
+    "nBinds": 80,
+    "bindsRange": [-50, 50],
+    "geometry": {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -63.34716796874999,
+              -34.234512362369856
+            ],
+            [
+              -64.22607421875,
+              -35.17380831799957
+            ],
+            [
+              -63.896484375,
+              -35.78217070326606
+            ],
+            [
+              -63.34716796874999,
+              -35.88905007936092
+            ],
+            [
+              -62.86376953124999,
+              -35.46066995149529
+            ],
+            [
+              -62.51220703125,
+              -35.08395557927643
+            ],
+            [
+              -62.49023437499999,
+              -34.57895241036947
+            ],
+            [
+              -63.34716796874999,
+              -34.234512362369856
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
+}
 ```

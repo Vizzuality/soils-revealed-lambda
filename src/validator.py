@@ -40,8 +40,8 @@ def sanitize_parameters(func):
 
     return wrapper
 
-def validate_ul_params(func):
-    """COGs validation parans"""
+def validate_body_params(func):
+    """analysis validation params"""
 
     @wraps(func)
     def wrapper(*args, **kwargs):

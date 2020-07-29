@@ -3,6 +3,14 @@
 # except ImportError:
 #   pass
 import os
+import logging
+from colorlog import ColoredFormatter
+import sys
+from flask import Flask, request, redirect, url_for, abort, jsonify, Blueprint, make_response
+
+from errors import error
+from validator import sanitize_parameters, validate_body_params, validate_point_params
+
 import numpy as np
 import xarray as xr
 from xhistogram.xarray import histogram
@@ -123,11 +131,105 @@ def analysis(event, context):
                                                                       request['variable'], request['dataset_type'], 
                                                                       request['group'], request['nBinds'], 
                                                                       request['bindsRange'])
-    # create response
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(serializer(counts, bins, mean_diff, mean_years, mean_values), cls=NpEncoder)
-    }
+    # create response only for lambda function
+    # response = {
+    #     "statusCode": 200,
+    #     "body": json.dumps(serializer(counts, bins, mean_diff, mean_years, mean_values), cls=NpEncoder)
+    # }
 
     # return response
-    return response
+    return serializer(counts, bins, mean_diff, mean_years, mean_values)
+
+#Log setup
+def setup_logLevels(level: str ="DEBUG"):
+    """Sets up logs level."""
+    formatter = ColoredFormatter(
+	"%(log_color)s [%(levelname)-8s%(reset)s%(name)s:%(funcName)s]- %(lineno)d: %(bold)s%(message)s",
+	datefmt=None,
+	reset=True,
+	log_colors={
+		'DEBUG':    'cyan',
+		'INFO':     'green',
+		'WARNING':  'yellow',
+		'ERROR':    'red',
+		'CRITICAL': 'red,bg_white',
+	},
+	secondary_log_colors={},
+	style='%'
+)
+    root = logging.getLogger()
+    root.setLevel(level)
+    error_handler = logging.StreamHandler(sys.stderr)
+    error_handler.setLevel(logging.WARN)
+    error_handler.setFormatter(formatter)
+    root.addHandler(error_handler)
+
+    output_handler = logging.StreamHandler(sys.stdout)
+    output_handler.setLevel(level)
+    output_handler.setFormatter(formatter)
+    root.addHandler(output_handler)
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
+    logging.getLogger('rasterio').setLevel(logging.ERROR)
+    logging.getLogger('botocore').setLevel(logging.ERROR)
+
+setup_logLevels()
+
+# Initialization of Flask application.
+
+app = Flask(__name__)
+app.url_map.strict_slashes = False
+
+################################################################################
+# Routes handle with Blueprint is allways a good idea
+################################################################################
+analysisService = Blueprint('raster', __name__)
+
+@analysisService.route('/analysis', methods=['POST'])
+@sanitize_parameters
+# @validate_body_params
+def get_data(**kwargs):
+    result = analysis()
+    return jsonify(
+            {'data': result}
+        ), 200
+
+
+app.register_blueprint(analysisService, url_prefix='/api/v1')
+
+################################################################################
+# Error handler
+################################################################################
+
+@app.errorhandler(403)
+def forbidden(e):
+    return error(status=403, detail='Forbidden')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return error(status=404, detail='Not Found')
+
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    return error(status=405, detail='Method Not Allowed')
+
+
+@app.errorhandler(410)
+def gone(e):
+    return error(status=410, detail='Gone')
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return error(status=500, detail='Internal Server Error')
+
+################################################################################
+# app runner
+################################################################################
+if __name__ == '__main__':
+    app.run(
+        debug=True,
+        host='0.0.0.0',
+        port=5020
+    )
