@@ -1,8 +1,8 @@
-try:
-  import unzip_requirements
-except ImportError:
-  pass
-
+# try:
+#   import unzip_requirements
+# except ImportError:
+#   pass
+import os
 import numpy as np
 import xarray as xr
 from xhistogram.xarray import histogram
@@ -13,9 +13,6 @@ from shapely.geometry import Polygon
 import _pickle as pickle
 import json
 import logging
-import os
-#import jsonpickle
-#import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -76,7 +73,7 @@ def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nB
         diff = diff[variable]
 
     bins = np.linspace(bindsRange[0], bindsRange[1], nBinds+1)
-    h = histogram(diff, bins=[bins], dim=['lat', 'lon'])
+    h = histogram(diff, bins=[bins], dim=['lat', 'lon'], block_size=1)
 
     counts = h.values
     mean_diff = diff.mean(skipna=True).values 
@@ -115,7 +112,7 @@ def analysis(event, context):
     
     # Get bbox and filter
     xmin, ymax, xmax, ymin = geometry.bounds
-    ds = ds[group].sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
+    ds = ds.sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
 
     shapes = zip([geometry], range(1))
     da_mask = rasterize(shapes, ds.coords, longitude='lon', latitude='lat').rename('mask')
