@@ -46,59 +46,43 @@ def validate_body_params(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         validation_schema = {
-            'data': {
+            'dataset_type': {
                 'type': 'string',
                 'required': True
             },
-            'mask': {
+            'group': {
                 'type': 'string',
-                'required': False
+                'required': True
+            },
+            'years': {
+                'type': 'list',
+                'required': True
+            },
+            'depth': {
+                'type': 'string',
+                'required': True
+            },
+            'variable': {
+                'type': 'string',
+                'required': True
+            },
+            'nBinds': {
+                'type': 'integer',
+                'required': True
+            },
+            'bindsRange': {
+                'type': 'list',
+                'required': True
+            },
+            'geometry': {
+                'type': 'dictionary',
+                'required': True
             }
             
         }
         try:
             logging.debug(f"[VALIDATOR - data and mask params]: {kwargs}")
             validator = Validator(validation_schema, allow_unknown=True, purge_unknown=True)
-            if not validator.validate(kwargs['params']):
-                return error(status=400, detail=validator.errors)
-            
-            kwargs['sanitized_params'] = validator.normalized(kwargs['params'])
-            return func(*args, **kwargs)
-        except Exception as err:
-            return error(status=502, detail=f'{err}')
-
-    return wrapper
-
-def validate_point_params(func):
-    """COGs validation parans"""
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        validation_schema = {
-            'data': {
-                'type': 'string',
-                'required': True
-            },
-            'mask': {
-                'type': 'string',
-                'required': False
-            },
-            'lat': {
-                'type': 'float',
-                'required': True,
-                'coerce': float
-            },
-            'long': {
-                'type': 'float',
-                'required': True,
-                'coerce': float
-            }
-            
-        }
-        try:
-            logging.debug(f"[VALIDATOR - data and mask params]: {kwargs}")
-            validator = Validator(validation_schema, allow_unknown=True, purge_unknown=True)
-            
             if not validator.validate(kwargs['params']):
                 return error(status=400, detail=validator.errors)
             

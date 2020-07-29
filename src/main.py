@@ -9,7 +9,7 @@ import sys
 from flask import Flask, request, redirect, url_for, abort, jsonify, Blueprint, make_response
 
 from errors import error
-from validator import sanitize_parameters, validate_body_params, validate_point_params
+from validator import sanitize_parameters, validate_body_params
 
 import numpy as np
 import xarray as xr
@@ -99,10 +99,11 @@ def serializer(counts, bins, mean_diff, mean_years, mean_values):
         'mean_values':mean_values
     }
 
-def analysis(event, context):
+#def analysis(event, context): #only for lambda
+def analysis(event):
     
     logger.info(f'## EVENT\r {event}')
-    logger.info(f'## CONTEXT\r {context}')
+    #logger.info(f'## CONTEXT\r {context}')
     request = event#.get_json()
     
     # Read xarray.Dataset from pkl
@@ -188,7 +189,7 @@ analysisService = Blueprint('raster', __name__)
 @sanitize_parameters
 # @validate_body_params
 def get_data(**kwargs):
-    result = analysis()
+    result = analysis(kwargs['params'])
     return jsonify(
             {'data': result}
         ), 200
