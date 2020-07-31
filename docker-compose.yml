@@ -2,10 +2,14 @@ version: '3'
 services:
   analysis:
     build: .
-    ports:
-      - "5020:5020"
-    command: develop
+    expose:
+      - 8000
+    command: start
     container_name: soils-analysis
     user: 1000:1000
-    volumes:
-      - "./src:/src/src"
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - analysis

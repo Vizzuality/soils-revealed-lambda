@@ -1,16 +1,14 @@
 #!/bin/bash
 set -e
 
-RETRIES=5
-
 case "$1" in
     develop)
         echo "Running Development Server"
-        exec python src/main.py
+        exec python dev_server.py
         ;;
     start)
         echo "Running Start"
-        exec python src/main.py
+        exec gunicorn -b 0.0.0.0:8000 soils:app
         ;;
     *)
         exec "$@"

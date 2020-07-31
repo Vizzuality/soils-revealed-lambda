@@ -1,0 +1,11 @@
+version: '3'
+services:
+  analysis:
+    build: .
+    ports:
+      - "5020:5020"
+    command: develop
+    container_name: soils-analysis
+    user: 1000:1000
+    volumes:
+      - "./soils:/soils/soils"
