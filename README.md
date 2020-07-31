@@ -22,7 +22,7 @@ to start working with this service. T test it please refer to service work
 `POST`
 
 ```
-http://${API_URL}/http://0.0.0.0:5020/api/v1/analysis
+http://0.0.0.0:5020/api/v1/analysis
 ```
 ```json
 body:
