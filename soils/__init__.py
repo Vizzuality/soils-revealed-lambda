@@ -15,7 +15,7 @@ from shapely.geometry import Polygon
 from xhistogram.xarray import histogram
 
 from soils.errors import error
-from soils.validator import sanitize_parameters
+from soils.validator import sanitize_parameters, validate_body_params
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -111,7 +111,7 @@ def analysis(event):
     logger.info(f'## DATASET\r {dataset_type}')
     parent = os.getcwd()
 
-    with open(f'{parent}/data/{dataset_type}_{group}.pkl', 'rb') as input:
+    with open(f'./soils/data/{dataset_type}_{group}.pkl', 'rb') as input:
         ds = pickle.load(input)
 
     # Create the data mask by rasterizing the vector data

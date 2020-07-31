@@ -35,7 +35,7 @@
 Example request
 
 ```
-POST http://${API_URL}/api/v1/analysis?dataset_type=experimental-dataset&group=stocks
+POST http://${API_URL}/api/v1/analysis
 ```
 
 POST body (as JSON):

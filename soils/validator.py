@@ -31,11 +31,7 @@ def sanitize_parameters(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            # logging.debug(f'[middleware] [sanitizer] args: {args}')
-            # logging.debug(f'[middleware] [sanitizer] kargs: {kwargs}')
-
-            # myargs={**kwargs, **request.args, **request.args.get('payload', {})}
-            myargs = {**kwargs, **request.args}
+            myargs = {**kwargs, **request.args, **request.get_json(force=True)}
             logging.debug(f'[middleware] [sanitizer] User_args: {myargs}')
             kwargs['params'] = myargs
         except Exception as err:
