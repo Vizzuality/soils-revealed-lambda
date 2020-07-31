@@ -115,7 +115,7 @@ def analysis(event, context):
     
     # Get bbox and filter
     xmin, ymax, xmax, ymin = geometry.bounds
-    ds = ds[group].sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax)
+    ds = ds.sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
 
     shapes = zip([geometry], range(1))
     da_mask = rasterize(shapes, ds.coords, longitude='lon', latitude='lat').rename('mask')
