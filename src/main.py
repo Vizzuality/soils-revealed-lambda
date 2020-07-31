@@ -64,7 +64,7 @@ def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nB
         mean_years = [int(str(x).split('-')[0]) for x in ds.coords.get('time').values]
     
     xmin, ymax, xmax, ymin = geometry.bounds
-    ds_index = ds.where(ds['mask'].isin(0.0)).sel(depth='0-30', lon=slice(xmin, xmax), lat=slice(ymin, ymax))
+    ds_index = ds.where(ds['mask'].isin(0.0)).sel(depth=depth, lon=slice(xmin, xmax), lat=slice(ymin, ymax))
 
     # Get difference between two dates
     diff = ds_index.loc[dict(time=end_date)] - ds_index.loc[dict(time=start_date)]
@@ -115,7 +115,11 @@ def analysis(event, context):
     
     # Get bbox and filter
     xmin, ymax, xmax, ymin = geometry.bounds
+<<<<<<< HEAD
     ds = ds.sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
+=======
+    ds = ds[group].sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
+>>>>>>> 91d52bdcfbc92ad4b21e1bad5fe3817e1f7e7579
 
     shapes = zip([geometry], range(1))
     da_mask = rasterize(shapes, ds.coords, longitude='lon', latitude='lat').rename('mask')
