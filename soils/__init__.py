@@ -8,12 +8,13 @@ from datetime import datetime
 import numpy as np
 import xarray as xr
 from affine import Affine
-from colorlog import ColoredFormatter
-from flask import Flask, jsonify, Blueprint
 from rasterio import features
 from shapely.geometry import Polygon
 from xhistogram.xarray import histogram
 
+from colorlog import ColoredFormatter
+from flask import Flask, Blueprint, make_response
+from werkzeug.exceptions import HTTPException
 from soils.errors import error
 from soils.validator import sanitize_parameters, validate_body_params
 
@@ -130,13 +131,7 @@ def analysis(event):
                                                                       request['variable'], request['dataset_type'],
                                                                       request['group'], request['nBinds'],
                                                                       request['bindsRange'])
-    # create response only for lambda function
-    # response = {
-    #     "statusCode": 200,
-    #     "body": json.dumps(serializer(counts, bins, mean_diff, mean_years, mean_values), cls=NpEncoder)
-    # }
 
-    # return response
     return serializer(counts, bins, mean_diff, mean_years, mean_values)
 
 
@@ -190,10 +185,25 @@ analysisService = Blueprint('raster', __name__)
 @sanitize_parameters
 # @validate_body_params
 def get_data(**kwargs):
-    result = analysis(kwargs['params'])
-    return jsonify(
-        {'data': result}
-    ), 200
+    try:
+        result = analysis(kwargs['params'])
+        response = make_response(json.dumps(
+            {'data': result}, cls=NpEncoder
+        ), 200)
+        response.content_type = "application/json"
+        return response
+    except Exception as e:
+        app.logger.debug(f"Error while calculating  new impact factors: {e}", exc_info=True)
+        raise e
+        response = make_response({}, 500)
+        # replace the body with JSON
+        response.data = json.dumps({
+            "code": 500,
+            "name": 'Unknown',
+            "description": f'{e}',
+        }, cls=NpEncoder)
+    response.content_type = "application/json"
+    return response 
 
 
 app.register_blueprint(analysisService, url_prefix='/api/v1')
@@ -202,6 +212,30 @@ app.register_blueprint(analysisService, url_prefix='/api/v1')
 ################################################################################
 # Error handler
 ################################################################################
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Return JSON instead of HTML for HTTP errors."""
+    #TODO: This should be more elegant 
+    # start with the correct headers and status code from the error
+    if isinstance(e, HTTPException):
+        response = e.get_response()
+        # replace the body with JSON
+        response.data = json.dumps({
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    }, cls=NpEncoder)
+        
+    else:
+        response = make_response({}, 500)
+        # replace the body with JSON
+        response.data = json.dumps({
+            "code": 500,
+            "name": 'Unknown',
+            "description": f'{e}',
+        }, cls=NpEncoder)
+    response.content_type = "application/json"
+    return response
 
 @app.errorhandler(403)
 def forbidden(e):
