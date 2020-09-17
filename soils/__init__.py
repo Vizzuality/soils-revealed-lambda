@@ -17,6 +17,7 @@ from flask import Flask, Blueprint, make_response
 from werkzeug.exceptions import HTTPException
 from soils.errors import error
 from soils.validator import sanitize_parameters, validate_body_params
+from soils.utils import binds, ranges
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -57,27 +58,28 @@ def rasterize(shapes, coords, latitude='latitude', longitude='longitude',
     return xr.DataArray(raster, coords=spatial_coords, dims=(latitude, longitude))
 
 
-def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nBinds, bindsRange):
-    if dataset_type == 'global-dataset' and group == 'historic':
+def compute_values(ds, geometry, dataset, variable, years, depth):
+    if dataset == 'historic':
         start_date = years[0]
         end_date = years[1]
-        mean_years = ds.coords.get('time').values
     else:
         start_date = np.datetime64(datetime.strptime(f'{years[0]}-12-31', "%Y-%m-%d"))
         end_date = np.datetime64(datetime.strptime(f'{years[1]}-12-31', "%Y-%m-%d"))
-        mean_years = [int(str(x).split('-')[0]) for x in ds.coords.get('time').values]
 
     xmin, ymax, xmax, ymin = geometry.bounds
-    ds_index = ds.where(ds['mask'].isin(0.0)).sel(depth=depth, lon=slice(xmin, xmax), lat=slice(ymin, ymax))
+    ds_index = ds.where(ds['mask'].isin(0.0)).sel(depth=depth, lon=slice(xmin, xmax), lat=slice(ymin, ymax), time=slice(start_date, end_date))
 
     # Get difference between two dates
     diff = ds_index.loc[dict(time=end_date)] - ds_index.loc[dict(time=start_date)]
 
     # Get counts and binds of the histogram
-    if dataset_type == 'experimental-dataset' and variable == 'concentration':
+    if dataset == 'experimental' and variable == 'concentration':
         diff = diff[variable] / 10.
     else:
         diff = diff[variable]
+    
+    nBinds = binds(dataset,variable)
+    bindsRange = ranges(dataset,variable)
 
     bins = np.linspace(bindsRange[0], bindsRange[1], nBinds + 1)
     h = histogram(diff, bins=[bins], dim=['lat', 'lon'], block_size=1)
@@ -85,6 +87,10 @@ def compute_values(ds, geometry, years, depth, variable, dataset_type, group, nB
     counts = h.values
     mean_diff = diff.mean(skipna=True).values
     mean_values = ds_index[variable].mean(['lon', 'lat']).values
+    if dataset == 'historic':
+        mean_years = ds.coords.get('time').values
+    else:
+        mean_years = [int(str(x).split('-')[0]) for x in ds_index.coords.get('time').values]
 
     return counts, bins, mean_diff, mean_years, mean_values
 
@@ -106,13 +112,13 @@ def analysis(event):
     request = event  # .get_json()
 
     # Read xarray.Dataset from pkl
-    dataset_type = request['dataset_type']
-    group = request['group']
+    dataset = request['dataset']
+    variable = request['variable']
 
-    logger.info(f'## DATASET\r {dataset_type}')
+    logger.info(f'## DATASET\r {dataset}')
     parent = os.getcwd()
 
-    with open(f'./soils/data/{dataset_type}_{group}.pkl', 'rb') as input:
+    with open(f'./soils/data/{dataset}_{variable}.pkl', 'rb') as input:
         ds = pickle.load(input)
 
     # Create the data mask by rasterizing the vector data
@@ -127,10 +133,7 @@ def analysis(event):
     ds['mask'] = da_mask
 
     # Compute output values
-    counts, bins, mean_diff, mean_years, mean_values = compute_values(ds, geometry, request['years'], request['depth'],
-                                                                      request['variable'], request['dataset_type'],
-                                                                      request['group'], request['nBinds'],
-                                                                      request['bindsRange'])
+    counts, bins, mean_diff, mean_years, mean_values = compute_values(ds, geometry, request['dataset'], request['variable'], request['years'], request['depth'])
 
     return serializer(counts, bins, mean_diff, mean_years, mean_values)
 
