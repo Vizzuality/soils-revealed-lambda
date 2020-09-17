@@ -48,11 +48,11 @@ def validate_body_params(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         validation_schema = {
-            'dataset_type': {
+            'dataset': {
                 'type': 'string',
                 'required': True
             },
-            'group': {
+            'variable': {
                 'type': 'string',
                 'required': True
             },
@@ -62,18 +62,6 @@ def validate_body_params(func):
             },
             'depth': {
                 'type': 'string',
-                'required': True
-            },
-            'variable': {
-                'type': 'string',
-                'required': True
-            },
-            'nBinds': {
-                'type': 'integer',
-                'required': True
-            },
-            'bindsRange': {
-                'type': 'list',
                 'required': True
             },
             'geometry': {
