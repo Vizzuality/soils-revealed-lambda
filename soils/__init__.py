@@ -90,10 +90,17 @@ def compute_values(ds, geometry, dataset, variable, years, depth):
     counts = h.values
     mean_diff = diff.mean(skipna=True).values
     mean_values = ds_index[variable].mean(['lon', 'lat']).values
+     
     if dataset == 'historic':
         mean_years = ds.coords.get('time').values
     else:
         mean_years = [int(str(x).split('-')[0]) for x in ds_index.coords.get('time').values]
+
+    # Replace NaNs with ""
+    if np.isnan(mean_diff): 
+        mean_diff = None
+
+    mean_values = [None if np.isnan(x) else x for x in mean_values]
 
     return counts, bins, mean_diff, mean_years, mean_values
 
