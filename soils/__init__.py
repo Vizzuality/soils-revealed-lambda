@@ -11,6 +11,9 @@ from affine import Affine
 from rasterio import features
 from shapely.geometry import Polygon
 from xhistogram.xarray import histogram
+import pyproj    
+import shapely.ops as ops
+from functools import partial
 
 from colorlog import ColoredFormatter
 from flask import Flask, Blueprint, make_response
@@ -95,13 +98,14 @@ def compute_values(ds, geometry, dataset, variable, years, depth):
     return counts, bins, mean_diff, mean_years, mean_values
 
 
-def serializer(counts, bins, mean_diff, mean_years, mean_values):
+def serializer(counts, bins, mean_diff, mean_years, mean_values, area):
     return {
         'counts': counts,
         'bins': bins,
         'mean_diff': mean_diff,
         'mean_years': mean_years,
-        'mean_values': mean_values
+        'mean_values': mean_values,
+        'area_ha': area
     }
 
 
@@ -124,6 +128,19 @@ def analysis(event):
     # Create the data mask by rasterizing the vector data
     geometry = Polygon(request['geometry'].get('features')[0].get('geometry').get('coordinates')[0])
 
+    # Get area
+    #area = geometry.area
+    geom_area = ops.transform(
+        partial(
+            pyproj.transform,
+            pyproj.Proj(init='EPSG:4326'),
+            pyproj.Proj(
+                proj='aea',
+                lat_1=geometry.bounds[1],
+                lat_2=geometry.bounds[3])),
+        geometry)
+    area = geom_area.area/ 1e+4
+
     # Get bbox and filter
     xmin, ymax, xmax, ymin = geometry.bounds
     ds = ds.sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
@@ -135,7 +152,7 @@ def analysis(event):
     # Compute output values
     counts, bins, mean_diff, mean_years, mean_values = compute_values(ds, geometry, request['dataset'], request['variable'], request['years'], request['depth'])
 
-    return serializer(counts, bins, mean_diff, mean_years, mean_values)
+    return serializer(counts, bins, mean_diff, mean_years, mean_values, area)
 
 
 # Log setup
