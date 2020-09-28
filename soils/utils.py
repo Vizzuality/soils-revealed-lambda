@@ -9,7 +9,7 @@ def binds(dataset,variable):
 
 def ranges(dataset,variable):
     ranges_dic = {
-        "experimental": {'stocks': [-10, 10], 'concentration': [-50, 50]},
+        "experimental": {'stocks': [-50, 50], 'concentration': [-10, 10]},
         "historic": {'stocks': [-40,40]},
         "recent": {'stocks': [-5,5]}
     }
