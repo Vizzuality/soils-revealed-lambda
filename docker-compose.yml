@@ -1,0 +1,15 @@
+version: '3'
+services:
+  analysis:
+    build: .
+    expose:
+      - 8000
+    command: start
+    container_name: soils-analysis
+    user: 1000:1000
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - analysis

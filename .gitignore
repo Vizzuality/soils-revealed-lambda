@@ -131,3 +131,29 @@ dmypy.json
 
 # Zip files
 *.zip
+#node
+node_modules
+package-lock.json
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+unzip_requirements.py
+# Serverless directories
+.serverless
+#*.pkl
