@@ -76,7 +76,7 @@ def compute_values(ds, geometry, dataset, variable, years, depth):
     diff = ds_index.loc[dict(time=end_date)] - ds_index.loc[dict(time=start_date)]
 
     # Get counts and binds of the histogram
-    if dataset == 'experimental':
+    if (dataset == 'experimental') and (variable == 'stocks'):
         diff = diff[variable] / 10.
     else:
         diff = diff[variable]
@@ -89,7 +89,7 @@ def compute_values(ds, geometry, dataset, variable, years, depth):
 
     counts = h.values
     mean_diff = diff.mean(skipna=True).values
-    if dataset == 'experimental':
+    if (dataset == 'experimental') and (variable == 'stocks'):
         mean_values = ds_index[variable].mean(['lon', 'lat']).values / 10.
     else:
         mean_values = ds_index[variable].mean(['lon', 'lat']).values

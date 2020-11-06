@@ -1,6 +1,6 @@
 def binds(dataset,variable):
     binds_dic = {
-        "experimental": {'stocks': 80, 'concentration': 80},
+        "experimental": {'stocks': 80, 'concentration': 20},
         "historic": {'stocks': 40},
         "recent": {'stocks': 10},
         "crop_I": {'stocks': 30}, 
