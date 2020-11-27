@@ -20,7 +20,7 @@ def ranges(dataset,variable):
     ranges_dic = {
         "experimental": {'stocks': [-50, 50], 'concentration': [-10, 10]},
         "historic": {'stocks': [-40,40]},
-        "recent": {'stocks': [-5,5]},
+        "recent": {'stocks': [-50,50]},
         "crop_I": {'stocks': [0,30]}, 
         "crop_MG": {'stocks': [0,30]}, 
         "crop_MGI": {'stocks': [0,30]}, 
