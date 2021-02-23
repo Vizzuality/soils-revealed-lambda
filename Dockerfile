@@ -4,7 +4,7 @@ ENV PATH /opt/conda/bin:$PATH
 RUN apt-get update \
       && apt-get install -y --no-install-recommends \
             postgresql-client \
-            gdal-bin libgdal-dev && export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt && rm -rf /var/lib/apt/lists/*
+            gdal-bin libgdal-dev libtbb2 tini && export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt && rm -rf /var/lib/apt/lists/*
 RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
     apt-get clean
@@ -26,10 +26,14 @@ COPY soils /soils/soils
 COPY requirements.txt /soils/requirements.txt
 COPY entrypoint.sh /soils/entrypoint.sh
 COPY gunicorn.py /soils/gunicorn.py
-COPY dev_server.py /soils/dev_server.py
+COPY gunicorn_dev.py /soils/gunicorn_dev.py
 
 WORKDIR /soils
 
 RUN conda install --force-reinstall -y -q -c conda-forge --file requirements.txt
 
-ENTRYPOINT ["/soils/entrypoint.sh"]
+USER www-data
+EXPOSE 8000
+
+ENTRYPOINT ["/usr/bin/tini","-g","--"]
+CMD ["gunicorn","--config=./gunicorn.py", "soils:app"]

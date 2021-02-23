@@ -8,7 +8,7 @@ case "$1" in
         ;;
     start)
         echo "Running Start"
-        exec gunicorn -b 0.0.0.0:8000 soils:app
+        exec gunicorn --config=./gunicorn.py soils:app
         ;;
     *)
         exec "$@"
