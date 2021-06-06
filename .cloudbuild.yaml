@@ -10,7 +10,7 @@ steps:
       - '.'
       - '-f'
       - './Dockerfile'
-    timeout: 1200s
+    timeout: 2000s
   - id: 'push-to-registry'
     name: 'gcr.io/cloud-builders/docker'
     args:
