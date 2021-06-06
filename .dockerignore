@@ -1,0 +1,6 @@
+# ignore folder on copy (more for local build)
+*.md
+.git
+.gitignore
+Dockerfile
+.cloudbuild.yaml
