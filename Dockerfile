@@ -1,24 +1,11 @@
-FROM python:3.8.1-slim-buster
+FROM python:3.8.10-slim-buster@sha256:0ffccea3f91806abb0a76eced3da5db52f77fd52aa926a3abd1a6bd275ec334c
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV PATH /opt/conda/bin:$PATH
+ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
       && apt-get install -y --no-install-recommends \
-            postgresql-client \
-            gdal-bin libgdal-dev libtbb2 tini && export CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt && rm -rf /var/lib/apt/lists/*
-RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 git mercurial subversion && \
-    apt-get clean
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
-    find /opt/conda/ -follow -type f -name '*.a' -delete && \
-    find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-    /opt/conda/bin/conda clean -afy
-RUN conda update -n base conda
+         postgresql-client \
+         build-essential \
+         gdal-bin libgdal-dev libtbb2 tini 
 WORKDIR /src
 RUN mkdir -p /soils
 
@@ -28,9 +15,15 @@ COPY entrypoint.sh /soils/entrypoint.sh
 COPY gunicorn.py /soils/gunicorn.py
 COPY gunicorn_dev.py /soils/gunicorn_dev.py
 
-WORKDIR /soils
 
-RUN conda install --force-reinstall -y -q -c conda-forge --file requirements.txt
+WORKDIR /soils
+RUN pip install -r requirements.txt
+
+# Clean up
+RUN pip cache purge \ 
+    && apt remove -y build-essential \ 
+    && apt -y autoremove \ 
+    && rm -rf /var/lib/apt/lists/*
 
 USER www-data
 EXPOSE 8000
