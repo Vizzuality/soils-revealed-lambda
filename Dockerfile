@@ -11,9 +11,7 @@ RUN mkdir -p /soils
 
 COPY soils /soils/soils
 COPY requirements.txt /soils/requirements.txt
-COPY entrypoint.sh /soils/entrypoint.sh
 COPY gunicorn.py /soils/gunicorn.py
-COPY gunicorn_dev.py /soils/gunicorn_dev.py
 
 
 WORKDIR /soils
