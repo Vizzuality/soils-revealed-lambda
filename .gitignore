@@ -157,3 +157,6 @@ unzip_requirements.py
 # Serverless directories
 .serverless
 #*.pkl
+
+# Local History for Visual Studio Code
+.history/
