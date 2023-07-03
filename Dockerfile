@@ -12,10 +12,14 @@ RUN mkdir -p /soils
 COPY soils /soils/soils
 COPY requirements.txt /soils/requirements.txt
 COPY gunicorn.py /soils/gunicorn.py
+COPY gunicorn_dev.py /soils/gunicorn_dev.py
 
 
 WORKDIR /soils
 RUN pip install -r requirements.txt
+
+# Install Flask and Jinja2
+RUN pip install --upgrade flask jinja2
 
 # Clean up
 RUN pip cache purge \ 
