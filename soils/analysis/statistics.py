@@ -1,6 +1,6 @@
 import logging
 
-from soils.analysis.compute_general_statistics import statistics
+from soils.analysis.general_statistics import statistics
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

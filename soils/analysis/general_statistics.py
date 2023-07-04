@@ -12,7 +12,7 @@ import pyproj
 import shapely.ops as ops
 from functools import partial
 
-from soils.analysis.result_serialization import serialize_general_stats
+from soils.analysis.serializers import serialize_general_stats
 from soils.analysis.utils import transform_from_latlon
 from soils.analysis.parameters import HistParams
 
@@ -90,14 +90,14 @@ def statistics(request):
 
     parent = os.getcwd()
 
+    # Read xarray.Dataset from pkl
     with open(f'./soils/data/{dataset}_{variable}.pkl', 'rb') as input:
         ds = pickle.load(input)
 
-    # Create the data mask by rasterizing the vector data
+    # Create the data mask by rasterizing the geometry
     geometry = Polygon(request['geometry'].get('features')[0].get('geometry').get('coordinates')[0])
 
     # Get area
-    #area = geometry.area
     geom_area = ops.transform(
         partial(
             pyproj.transform,
@@ -113,6 +113,7 @@ def statistics(request):
     xmin, ymax, xmax, ymin = geometry.bounds
     ds = ds.sel(lon=slice(xmin, xmax), lat=slice(ymin, ymax))
 
+    # Rasterize geometry
     shapes = zip([geometry], range(1))
     da_mask = rasterize(shapes, ds.coords, longitude='lon', latitude='lat').rename('mask')
     ds['mask'] = da_mask
