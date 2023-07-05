@@ -5,7 +5,7 @@ import sys
 from flask import Flask, Blueprint, make_response
 from werkzeug.exceptions import HTTPException
 
-from soils.analysis.statistics import analysis
+from soils.analysis.analysis import analysis
 from soils.encoders import NpEncoder
 from soils.errors import error
 from soils.logs import setup_logLevels
