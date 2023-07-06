@@ -95,16 +95,32 @@ POST body (as JSON):
 
 ## Testing
 
-Folder test, contains a JSON data file and a `curl-format.txt`, usefull for testing. In the example bellow we used `service.sh develop` to run a local server on port `8000`.
+Folder test, contains a JSON data files, `curl-format.txt`, and `test_analysis_endpoint.py`, usefull for testing. In the example bellow we used `service.sh develop` to run a local server on port `5020`.
 
 ```bash 
 # At project root level
 ./analysis.sh develop
 ```
 
-Testing using curl:
+**Testing using curl**:
 
 ```bash
 cd ./test
 curl -v -w "@curl-format.txt" -H "Content-Type: application/json" -d @data.json http://localhost:5020/api/v1/analysis
 ```
+
+**Testing with pytest**:
+To run the tests using `pytest`, follow these steps:
+1. Make sure you have `pytest` installed. You can install it using pip:
+```shell
+pip install pytest
+```
+2. Open a terminal and navigate to the test folder.
+```shell
+cd ./test
+```
+3. Run the following command to execute the tests:
+```shell
+pytest
+```
+The tests will be automatically discovered and executed. They will send requests to the analysis endpoint using different payloads and validate the responses.
