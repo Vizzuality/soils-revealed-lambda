@@ -99,7 +99,7 @@ Folder test, contains a JSON data files, `curl-format.txt`, and `test_analysis_e
 
 ```bash 
 # At project root level
-./analysis.sh develop
+./service.sh develop
 ```
 
 **Testing using curl**:
