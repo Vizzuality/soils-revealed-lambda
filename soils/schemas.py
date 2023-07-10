@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List
 
 from pydantic import BaseModel
 
@@ -6,11 +6,11 @@ from pydantic import BaseModel
 class AnalysisRequest(BaseModel):
     dataset: str
     variable: str
-    years: list
+    years: List[str]
     depth: str
     geometry: dict
-    
-    
+
+
 class AnalysisResponse(BaseModel):
     dataset: str
     variable: str
@@ -18,6 +18,7 @@ class AnalysisResponse(BaseModel):
     depth: str
     geometry: dict
     value: float
+
 
 # def myCoerc(n):
 #     try:
@@ -33,6 +34,3 @@ class AnalysisResponse(BaseModel):
 # to_lower = lambda v: v.lower()
 # # to_list = lambda v: json.loads(v.lower())
 # to_list = lambda v: json.loads(v)
-
-
-

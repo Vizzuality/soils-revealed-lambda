@@ -9,10 +9,9 @@ services:
       - .env
     ports:
       - "5020:5020"
-    command: ["gunicorn","--config=./gunicorn_dev.py", "soils.main:app"]
+    command: uvicorn soils.main:app --host 0.0.0.0 --port 5020 --reload
     container_name: soils-analysis
     user: 1000:1000
     volumes:
       - "./soils:/soils/soils"
       - "./test:/soils/test"
-      - "./conftest.py:/soils/conftest.py"
