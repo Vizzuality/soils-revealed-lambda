@@ -3,6 +3,9 @@ from starlette.middleware.cors import CORSMiddleware
 
 from soils.routes import api_router
 from soils.config import settings
+from soils.logs import setup_logLevels
+
+setup_logLevels()
 
 
 app = FastAPI(
