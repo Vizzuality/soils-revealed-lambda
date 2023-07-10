@@ -10,14 +10,14 @@ def setup_logLevels(level: str = "DEBUG"):
         datefmt=None,
         reset=True,
         log_colors={
-            'DEBUG': 'cyan',
-            'INFO': 'green',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'red,bg_white',
+            "DEBUG": "cyan",
+            "INFO": "green",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "red,bg_white",
         },
         secondary_log_colors={},
-        style='%'
+        style="%",
     )
     root = logging.getLogger()
     root.setLevel(level)
@@ -30,6 +30,6 @@ def setup_logLevels(level: str = "DEBUG"):
     output_handler.setLevel(level)
     output_handler.setFormatter(formatter)
     root.addHandler(output_handler)
-    logging.getLogger('werkzeug').setLevel(logging.ERROR)
-    logging.getLogger('rasterio').setLevel(logging.ERROR)
-    logging.getLogger('botocore').setLevel(logging.ERROR)
+    logging.getLogger("fastapi").setLevel(logging.ERROR)
+    logging.getLogger("rasterio").setLevel(logging.ERROR)
+    logging.getLogger("botocore").setLevel(logging.ERROR)

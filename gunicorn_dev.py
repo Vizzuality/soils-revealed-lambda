@@ -3,7 +3,7 @@ import os
 bind = '0.0.0.0:5020'
 backlog = 2048
 
-worker_class = 'eventlet'
+worker_class = 'uvicorn.workers.UvicornWorker'
 # (2*CPU)+1
 workers = 2
 threads = 5

@@ -160,7 +160,7 @@ class LandCoverStatistics:
         self.scenarios = SCENARIOS
         self.lc_params = LandCoverData()
         self.ds = None
-        self.data = {}
+        self.data = {} # type: dict #TODO improve typing
 
     def read_dataset(self):
         """

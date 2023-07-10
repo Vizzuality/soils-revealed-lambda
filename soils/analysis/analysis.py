@@ -1,6 +1,7 @@
 import logging
-import _pickle as pickle
+from pydantic.tools import parse_obj_as
 
+from soils.schemas import AnalysisRequest, AnalysisResponse
 from soils.analysis.statistics import SoilStatistics, LandCoverStatistics
 
 logger = logging.getLogger()
@@ -11,7 +12,7 @@ SCENARIOS = [
     'rewilding', 'degradation_ForestToGrass', 'degradation_ForestToCrop', 'degradation_NoDeforestation'
 ]
 
-def analysis(event):
+def analysis(event: AnalysisRequest) -> AnalysisResponse:
     """
     Perform analysis based on the provided event.
 
@@ -23,9 +24,7 @@ def analysis(event):
     """
     logger.info(f'## EVENT\r {event}')
 
-    request = event
-
-    dataset = request['dataset']
+    dataset = event.dataset
     group_type = 'recent' if dataset == 'recent' else 'future' if dataset in SCENARIOS else None
 
     logger.info(f'## GROUP_TYPE\r {group_type}')
@@ -33,12 +32,14 @@ def analysis(event):
     stats_dict = {}
 
     # Get general statistics
-    soil_statistics = SoilStatistics(request)
+    soil_statistics = SoilStatistics(event)
     stats_dict.update(soil_statistics.get_statistics())
 
     # Get land cover statistics
     if group_type:
-        lc_statistics = LandCoverStatistics(request, group_type)
+        lc_statistics = LandCoverStatistics(event, group_type)
         stats_dict.update(lc_statistics.get_statistics())
 
-    return stats_dict
+    #TODO: this is a temporary fix to avoid the serialization of the
+    #      numpy arrays. We should find a better way to do this.
+    return parse_obj_as(AnalysisResponse, stats_dict)

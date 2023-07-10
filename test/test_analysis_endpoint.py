@@ -1,34 +1,23 @@
 import json
 import pytest
-import requests
+from fastapi.testclient import TestClient
+from pydantic.tools import parse_obj_as
 
-def read_payload_from_file(filename):
-    with open(filename) as file:
-        payload = json.load(file)
-    return payload
+from soils.schemas import AnalysisRequest, AnalysisResponse
 
-@pytest.fixture(params=['data_recent.json', 'data_future.json'])
-def payload(request):
-    return read_payload_from_file(request.param)
 
-def test_analysis_endpoint(payload):
-    url = 'http://localhost:5020/api/v1/analysis'
-    headers = {'Content-Type': 'application/json'}
-    response = requests.post(url, data=json.dumps(payload), headers=headers)
+@pytest.mark.parametrize("payload_path", ["./fixtures/request.json"])
+@pytest.mark.parametrize("response_path", ["./fixtures/response.json"])
+def test_success_analysis_endpoint(
+    client: TestClient, payload_path: str, response_path: str
+) -> None:
+    payload = parse_obj_as(AnalysisRequest, json.loads(payload_path))
+
+    expected_response = parse_obj_as(AnalysisResponse, json.loads(response_path))
+    response = client.post("/api/v1/analysis", json=payload)
+
     assert response.status_code == 200
-    response_data = response.json()
 
-    # Common assertions for both payloads
-    assert 'data' in response_data
-    assert 'counts' in response_data['data']
-    assert 'bins' in response_data['data']
-    assert "mean_diff" in response_data['data']
-    assert "mean_years" in response_data['data']
-    assert "mean_values" in response_data['data']
-    assert "area_ha" in response_data['data']
-    assert "land_cover" in response_data['data']
-    assert "land_cover_groups" in response_data['data']
+    response_body = parse_obj_as(AnalysisResponse, response.json())
 
-    # Perform assertions based on the payload
-    if 'dataset' in payload and payload['dataset'] == 'recent':
-        assert "land_cover_group_2018" in response_data['data']
+    assert response_body == expected_response
