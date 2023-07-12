@@ -17,8 +17,8 @@ import logging
 api_router = APIRouter()
 
 
-# TODO: add as response model response_model=List[schemas.AnalysisResponse]
-@api_router.post("/analysis")
+# TODO: add as response model response_model=List[AnalysisResponse]
+@api_router.post("/analysis", response_model=List[AnalysisResponse])
 def get_data(params: AnalysisRequest) -> Any:
     try:
         result = analysis(params)

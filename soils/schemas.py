@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Literal, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel, Field, PrivateAttr
 
 
 class AnalysisRequest(BaseModel):
@@ -11,26 +11,28 @@ class AnalysisRequest(BaseModel):
     geometry: dict
 
 
-class AnalysisResponse(BaseModel):
-    dataset: str
-    variable: str
-    years: list
-    depth: str
-    geometry: dict
-    value: float
+class CommonResponse(BaseModel):
+    data: str
+    counts: List[int]
+    bins: List[float]
+    mean_diff: float
+    mean_years: List[int]
+    mean_values: List[float]
+    area_ha: float
 
 
-# def myCoerc(n):
-#     try:
-#         return lambda v: None if v in ("null") else n(v)
-#     except Exception:
-#         return None
+class FutureResponse(CommonResponse):
+    _type: Literal["future"]
+    land_cover: dict
+    land_cover_groups: dict
 
 
-# null2int = myCoerc(int)
-# null2float = myCoerc(float)
+class RecentResponse(CommonResponse):
+    _type: Literal["recent"]
+    land_cover_group_2018: dict
+    land_cover: dict
+    land_cover_groups: dict
 
-# to_bool = lambda v: v.lower() in ("true", "1")
-# to_lower = lambda v: v.lower()
-# # to_list = lambda v: json.loads(v.lower())
-# to_list = lambda v: json.loads(v)
+
+class AnalysisResponse(RootModel):
+    root: Union[FutureResponse, RecentResponse] = Field(..., discriminator="_type")
