@@ -11,11 +11,18 @@ from soils.schemas import AnalysisRequest, AnalysisResponse
     "payload_path",
     [
         "./test/fixtures/request.json",
-        "./test/fixtures/data_recent.json",
-        "./test/fixtures/data_future.json",
-    ],
+        "./test/fixtures/request_recent.json",
+        "./test/fixtures/request_future.json"
+    ]
 )
-@pytest.mark.parametrize("response_path", ["./test/fixtures/response.json"])
+@pytest.mark.parametrize(
+    "response_path", 
+    [
+        "./test/fixtures/response.json", 
+        "./test/fixtures/response_recent.json",
+        "./test/fixtures/response_future.json"
+    ]
+)
 def test_success_analysis_endpoint(
     client: TestClient, payload_path: str, response_path: str
 ) -> None:
@@ -28,8 +35,8 @@ def test_success_analysis_endpoint(
 
     assert response.status_code == 200
 
-    # expected_response = parse_obj_as(AnalysisResponse, read_json(payload_path))
+    expected_response = parse_obj_as(AnalysisResponse, read_json(payload_path))
 
-    # response_body = parse_obj_as(AnalysisResponse, response.json())
+    response_body = parse_obj_as(AnalysisResponse, response.json())
 
-    # assert response_body == expected_response
+    assert response_body == expected_response
