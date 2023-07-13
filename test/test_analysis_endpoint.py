@@ -35,7 +35,7 @@ def test_success_analysis_endpoint(
 
     assert response.status_code == 200
 
-    expected_response = parse_obj_as(AnalysisResponse, read_json(payload_path))
+    expected_response = parse_obj_as(AnalysisResponse, read_json(response_path))
 
     response_body = parse_obj_as(AnalysisResponse, response.json())
 
