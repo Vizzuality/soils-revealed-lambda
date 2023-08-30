@@ -1,4 +1,5 @@
 import logging
+import warnings
 import sys
 from colorlog import ColoredFormatter
 
@@ -6,7 +7,7 @@ from colorlog import ColoredFormatter
 def setup_logLevels(level: str = "DEBUG"):
     """Sets up logs level."""
     formatter = ColoredFormatter(
-        "%(log_color)s [%(levelname)-8s%(reset)s%(name)s:%(funcName)s]- %(lineno)d: %(bold)s%(message)s",
+        "%(log_color)s%(levelname)-8s%(reset)s[%(filename)s:%(lineno)d]: %(bold)s%(message)s",
         datefmt=None,
         reset=True,
         log_colors={
@@ -39,3 +40,5 @@ def setup_logLevels(level: str = "DEBUG"):
     logging.getLogger("boto3").setLevel(logging.ERROR)
     logging.getLogger("urllib3").setLevel(logging.ERROR)
     logging.getLogger("pyproj").setLevel(logging.ERROR)
+
+    warnings.simplefilter(action="ignore", category=FutureWarning)

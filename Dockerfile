@@ -9,12 +9,13 @@ RUN apt-get update \
     postgresql-client \
     build-essential \
     gdal-bin libgdal-dev proj-bin tini 
+RUN pip install --upgrade pip
 WORKDIR /src
 RUN mkdir -p /soils
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY ./requirements.txt /soils/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /soils/requirements.txt
+RUN pip install --prefer-binary -r /soils/requirements.txt
 
 COPY gunicorn.py /soils/gunicorn.py
 COPY gunicorn_dev.py /soils/gunicorn_dev.py

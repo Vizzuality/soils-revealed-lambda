@@ -1,9 +1,11 @@
-version: '3'
+version: "3"
 services:
-  analysis:
-    build: .
-    ports:
-      - "8000:8000" 
-    command: ["gunicorn","--config=./gunicorn.py", "soils.main:app"]
-    container_name: soils-analysis
-    user: 1000:1000
+    analysis:
+        build: .
+        env_file:
+            - .env
+        ports:
+            - "8000:8000"
+        command: ["gunicorn", "--config=./gunicorn.py", "soils.main:app"]
+        container_name: soils-analysis
+        user: 1000:1000

@@ -1,8 +1,7 @@
 import logging
 from typing import Any
-from pydantic.tools import parse_obj_as
 
-from soils.schemas import AnalysisRequest, AnalysisResponse
+from soils.schemas import AnalysisRequest
 from soils.analysis.statistics import SoilStatistics, LandCoverStatistics
 
 logger = logging.getLogger()
@@ -40,7 +39,9 @@ def analysis(event: AnalysisRequest) -> Any:
 
     logger.info(f"## GROUP_TYPE\r {group_type}")
 
-    stats_dict = {}
+    stats_dict = {
+        "_type": group_type or "common",
+    }
 
     # Get general statistics
     soil_statistics = SoilStatistics(event.dict())
@@ -54,4 +55,3 @@ def analysis(event: AnalysisRequest) -> Any:
     # TODO: this is a temporary fix to avoid the serialization of the
     #      numpy arrays. We should find a better way to do this
     return stats_dict
-    # return parse_obj_as(AnalysisResponse, stats_dict)

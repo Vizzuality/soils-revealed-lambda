@@ -1,17 +1,17 @@
-version: '3'
+version: "3"
 services:
-  analysis:
-    build:
-      dockerfile: Dockerfile
-      args:
-        - INSTALL_DEV=true
-    env_file:
-      - .env
-    ports:
-      - "5020:5020"
-    command: uvicorn soils.main:app --host 0.0.0.0 --port 5020 --reload
-    container_name: soils-analysis
-    user: 1000:1000
-    volumes:
-      - "./soils:/soils/soils"
-      - "./test:/soils/test"
+    analysis:
+        build:
+            dockerfile: Dockerfile
+            args:
+                - INSTALL_DEV=true
+        env_file:
+            - dev.env
+        ports:
+            - "5020:5020"
+        command: ["gunicorn", "--config=./gunicorn_dev.py", "soils.main:app"]
+        container_name: soils-analysis
+        user: 1000:1000
+        volumes:
+            - "./soils:/soils/soils"
+            - "./test:/soils/test"

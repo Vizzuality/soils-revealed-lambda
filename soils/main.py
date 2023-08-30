@@ -8,7 +8,9 @@ from soils.logs import setup_logLevels
 setup_logLevels()
 
 
-app = FastAPI(title=settings.PROJECT_NAME)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+)
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:

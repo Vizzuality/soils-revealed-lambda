@@ -1,14 +1,14 @@
-from typing import Any, List
+from typing import Any
 import json
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
-
 
 from soils.analysis.analysis import analysis
 from soils.schemas import AnalysisRequest, AnalysisResponse
 from soils.encoders import NpEncoder
+
 import logging
+import traceback
 
 
 ################################################################################
@@ -17,14 +17,17 @@ import logging
 api_router = APIRouter()
 
 
-@api_router.post("/analysis", response_model=List[AnalysisResponse])
+@api_router.post("/analysis", response_model=AnalysisResponse)
 def get_data(params: AnalysisRequest) -> Any:
     try:
         result = analysis(params)
-        return JSONResponse(
-            content=json.loads(json.dumps(result, cls=NpEncoder)), status_code=200
-        )
+        # return JSONResponse(
+        #     content=, status_code=200
+        # )
+        return json.loads(json.dumps(result, cls=NpEncoder))
 
     except Exception as e:
+        logging.error(traceback.format_exc())
+        logging.error(e.__context__)
         logging.error(e.__dict__)
         raise HTTPException(status_code=500, detail=str(e))
