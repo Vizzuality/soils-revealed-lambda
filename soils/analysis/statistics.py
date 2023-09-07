@@ -28,6 +28,8 @@ SCENARIOS = [
     "degradation_NoDeforestation",
 ]
 
+PIX_HA = 6.25
+
 
 class SoilStatistics:
     """
@@ -272,7 +274,7 @@ class LandCoverStatistics:
                 records = grouped_df[grouped_df[indicator[1]] == category].sort_values(
                     "stocks_change"
                 )
-                records = dict(zip(records[indicator[0]], records["stocks_change"]))
+                records = dict(zip(records[indicator[0]], records["stocks_change"]*PIX_HA))
                 data_tmp[category] = records
 
             self.data[name] = data_tmp
@@ -312,9 +314,6 @@ class LandCoverStatistics:
         )
         # Remove rows where mask is null
         df = df[~df["mask"].isnull()]
-        # Remove rows with null or 0 change
-        # df = df[df[self.scenarios].notnull().all(axis=1)]
-        # df = df[(df[self.scenarios] != 0.0).all(axis=1)]
         ## Add category names
         df = df[["land-cover"] + self.scenarios].rename(
             columns={"land-cover": "land_cover"}
@@ -333,7 +332,7 @@ class LandCoverStatistics:
             for scenario in self.scenarios:
                 df_sum = df.groupby(indicator)[scenario].sum().reset_index()
 
-                records = dict(zip(df_sum[name], df_sum[scenario]))
+                records = dict(zip(df_sum[name], df_sum[scenario]*PIX_HA))
 
                 data_tmp[scenario] = records
 
